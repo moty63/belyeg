@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JSONPlaceholder Adatok</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Arial', sans-serif;
+        }
+        
+        body {
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #333;
+        }
+        
+        .container {
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .section {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+        }
+        
+        .section-title {
+            margin-bottom: 20px;
+            color: #444;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+        }
+        
+        .posts-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        
+        .card {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            transition: transform 0.2s, box-shadow 0.2s;
+            background: white;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .card-title {
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+            color: #2c3e50;
+        }
+        
+        .card-body {
+            color: #666;
+            line-height: 1.5;
+        }
+        
+        #map {
+            height: 500px;
+            width: 100%;
+            border-radius: 8px;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 20px;
+            font-style: italic;
+            color: #777;
+        }
+        
+        @media (max-width: 768px) {
+            .posts-container {
+                grid-template-columns: 1fr;
+            }
+            
+            #map {
+                height: 300px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>JSONPlaceholder Adatok</h1>
+        
+        <div class="section">
+            <h2 class="section-title">Felhasználók helye</h2>
+            <div id="map"></div>
+        </div>
+        
+        <div class="section">
+            <h2 class="section-title">Bejegyzések</h2>
+            <div class="posts-container" id="posts-container">
+                <div class="loading">Adatok betöltése...</div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const map = L.map('map').setView([39.8283, -98.5795], 4);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            }).addTo(map);
+
+            fetch('https://jsonplaceholder.typicode.com/users')
+                .then(response => response.json())
+                .then(users => {
+                    users.forEach(user => {
+                        if (user.address && user.address.geo) {
+                            const lat = parseFloat(user.address.geo.lat);
+                            const lng = parseFloat(user.address.geo.lng);
+                            
+                            const marker = L.marker([lat, lng]).addTo(map);
+                            marker.bindTooltip(user.name, {permanent: false, direction: 'top'});
+                        }
+                    });
+
+                    if (users.length > 0 && users[0].address && users[0].address.geo) {
+                        const firstUser = users[0];
+                        map.setView([firstUser.address.geo.lat, firstUser.address.geo.lng], 2);
+                    }
+                })
+                .catch(error => console.error('Hiba a felhasználók betöltésekor:', error));
+
+            fetch('https://jsonplaceholder.typicode.com/posts')
+                .then(response => response.json())
+                .then(posts => {
+                    const postsContainer = document.getElementById('posts-container');
+                    postsContainer.innerHTML = '';
+                    
+                    posts.forEach(post => {
+                        const card = document.createElement('div');
+                        card.className = 'card';
+                        
+                        const title = document.createElement('h3');
+                        title.className = 'card-title';
+                        title.textContent = post.title;
+                        
+                        const body = document.createElement('p');
+                        body.className = 'card-body';
+                        body.textContent = post.body;
+                        
+                        card.appendChild(title);
+                        card.appendChild(body);
+                        
+                        postsContainer.appendChild(card);
+                    });
+                })
+                .catch(error => {
+                    console.error('Hiba a bejegyzések betöltésekor:', error);
+                    document.getElementById('posts-container').innerHTML = 
+                        '<div class="loading">Hiba történt az adatok betöltésekor. Kérjük, próbálja újra később.</div>';
+                });
+        });
+    </script>
+</body>
+</html>
