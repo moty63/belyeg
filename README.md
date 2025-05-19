@@ -1,5 +1,7 @@
 # belyeg
-belyeg csin v mi
+belyeg csin vagy mi
 halo
+-szia
 
-05.12:  !!!!!!!  EZ MEG CSAK SABLON, NEM VEGEREDMENY  !!!!!!!
+
+05.19:  !!!!!!!  Haladunk, de NEM VEGEREDMENY  !!!!!!!
