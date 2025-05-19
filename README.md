@@ -4,4 +4,4 @@ halo
 -szia
 
 
-05.19:  !!!!!!!  Haladunk, de NEM VEGEREDMENY  !!!!!!!
+05.19:  !!!!!!!  mostmar VEGEREDMENY  !!!!!!!
